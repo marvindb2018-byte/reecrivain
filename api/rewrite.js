@@ -6,12 +6,26 @@ const TONES = {
   decontracte: "un ton décontracté et naturel",
 };
 
+const LANGS = {
+  fr: "français",
+  en: "anglais",
+  es: "espagnol",
+  de: "allemand",
+  it: "italien",
+  pt: "portugais",
+  nl: "néerlandais",
+  ar: "arabe",
+  zh: "chinois",
+  ja: "japonais",
+};
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Méthode non autorisée" });
   }
 
-  const { text, tone } = req.body || {};
+  const { text, tone, lang } = req.body || {};
+  const langName = typeof lang === "string" && Object.hasOwn(LANGS, lang) ? LANGS[lang] : null;
 
   if (typeof text !== "string" || !text.trim()) {
     return res.status(400).json({ error: "Texte manquant" });
@@ -38,6 +52,7 @@ export default async function handler(req, res) {
             content:
               `Tu es un rédacteur expert en français. Réécris le texte fourni avec ${TONES[tone]}. ` +
               "Conserve le sens et toutes les informations. " +
+              "Écris dans la même langue que le texte d'origine. " +
               "Réponds uniquement avec le texte réécrit, sans introduction ni commentaire.",
           },
           { role: "user", content: text },
@@ -54,7 +69,33 @@ export default async function handler(req, res) {
 
     const data = await response.json();
     const result = data.choices?.[0]?.message?.content?.trim() ?? "";
-    return res.status(200).json({ result });
+    let translation = "";
+    if (langName && result) {
+      const tr = await fetch(`${process.env.API_BASE}/chat/completions`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: process.env.MODEL,
+          messages: [
+            {
+              role: "system",
+              content: `Traduis le texte suivant en ${langName}. Conserve le ton et le sens. Réponds uniquement avec la traduction, sans introduction ni commentaire.`,
+            },
+            { role: "user", content: result },
+          ],
+          temperature: 0.3,
+        }),
+      });
+      if (tr.ok) {
+        const trData = await tr.json();
+        translation = trData.choices?.[0]?.message?.content?.trim() ?? "";
+      }
+    }
+
+    return res.status(200).json({ result, translation });
   } catch (err) {
     return res.status(500).json({ error: "Erreur serveur" });
   }
