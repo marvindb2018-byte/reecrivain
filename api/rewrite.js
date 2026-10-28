@@ -28,6 +28,8 @@ export default async function handler(req, res) {
   const level = Number.isInteger(intensity) && intensity >= 1 && intensity <= 5 ? intensity : 3;
   const langName = typeof lang === "string" && Object.hasOwn(LANGS, lang) ? LANGS[lang] : null;
 
+  const clean = req.body?.clean === true;
+  const clean = req.body?.clean === true;
   if (typeof text !== "string" || !text.trim()) {
     return res.status(400).json({ error: "Texte manquant" });
   }
@@ -53,6 +55,7 @@ export default async function handler(req, res) {
             content:
               `Tu es un rédacteur expert en français. Réécris le texte fourni avec ${TONES[tone]}. Intensité du ton : ${level} sur 5 (1 = à peine perceptible, 5 = très prononcé). ` +
               "Conserve le sens et toutes les informations. " +
+              (clean ? "Supprime ou remplace toute insulte, grossièreté, vulgarité et formulation agressive ou irrespectueuse, en gardant les faits et les demandes de l'auteur. " : "") +
               "Écris dans la même langue que le texte d'origine. " +
               "Réponds uniquement avec le texte réécrit, sans introduction ni commentaire.",
           },
