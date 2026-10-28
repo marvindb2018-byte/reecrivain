@@ -11,7 +11,10 @@
     .tones button.active { background: #333; color: #fff; }
     #go { padding: .6rem 1.4rem; font-size: 1rem; cursor: pointer; }
     #result { white-space: pre-wrap; background: #f5f5f5; padding: 1rem; border-radius: 8px; min-height: 80px; margin-top: .5rem; }
-    #error { color: #c00; }
+        #error { color: #c00; }
+    #history .entry { border: 1px solid #ddd; border-radius: 8px; padding: .75rem; margin-bottom: .5rem; }
+    #history small { color: #666; display: block; margin-bottom: .3rem; }
+    #history .entry div { white-space: pre-wrap; margin-bottom: .4rem; }
   </style>
 </head>
 <body>
@@ -32,7 +35,11 @@
 
   <h3>Résultat</h3>
   <div id="result"></div>
-  <button id="copy">Copier</button>
+    <button id="copy">Copier</button>
+
+  <h3>Historique</h3>
+  <div id="history"></div>
+  <button id="clearHistory">Effacer l'historique</button>
 
   <script>
     let tone = "professionnel";
@@ -61,7 +68,8 @@
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error);
-        result.textContent = data.result;
+                result.textContent = data.result;
+        addToHistory(text, tone, data.result);
       } catch (e) {
         error.textContent = e.message || "Une erreur est survenue";
       } finally {
@@ -70,8 +78,64 @@
     });
 
     document.getElementById("copy").addEventListener("click", () => {
-      navigator.clipboard.writeText(document.getElementById("result").textContent);
+            navigator.clipboard.writeText(document.getElementById("result").textContent);
     });
+
+    const KEY = "reecrivain_history";
+
+    function loadHistory() {
+      try {
+        return JSON.parse(localStorage.getItem(KEY)) || [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveHistory(list) {
+      try {
+        localStorage.setItem(KEY, JSON.stringify(list));
+      } catch (e) {}
+    }
+
+    function addToHistory(original, tone, result) {
+      const list = loadHistory();
+      list.unshift({ original, tone, result, date: new Date().toLocaleString("fr-FR") });
+      saveHistory(list.slice(0, 10));
+      renderHistory();
+    }
+
+    function renderHistory() {
+      const box = document.getElementById("history");
+      const list = loadHistory();
+      box.innerHTML = "";
+      if (!list.length) {
+        box.textContent = "Aucune réécriture pour l'instant.";
+        return;
+      }
+      list.forEach(item => {
+        const div = document.createElement("div");
+        div.className = "entry";
+        const meta = document.createElement("small");
+        meta.textContent = item.date + " · " + item.tone;
+        const txt = document.createElement("div");
+        txt.textContent = item.result;
+        const btn = document.createElement("button");
+        btn.textContent = "Réutiliser";
+        btn.addEventListener("click", () => {
+          document.getElementById("input").value = item.original;
+          document.getElementById("result").textContent = item.result;
+        });
+        div.append(meta, txt, btn);
+        box.appendChild(div);
+      });
+    }
+
+    document.getElementById("clearHistory").addEventListener("click", () => {
+      saveHistory([]);
+      renderHistory();
+    });
+
+    renderHistory();
   </script>
 </body>
 </html>
