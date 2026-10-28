@@ -35,6 +35,12 @@
     #copy, #clearHistory, #history button { background: var(--accent-soft); color: var(--accent); border: none; border-radius: 8px; padding: .4rem .9rem; cursor: pointer; font: inherit; }
     #history .entry { background: var(--card); border-color: var(--border); }
     #history small { color: var(--muted); }
+  .results { display: flex; gap: 1rem; flex-wrap: wrap; align-items: flex-start; }
+    .col { flex: 1 1 300px; min-width: 0; }
+    #translation { white-space: pre-wrap; overflow-wrap: anywhere; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1rem; margin-top: .5rem; }
+    #translation:empty { min-height: 80px; }
+    #copyTrans { background: var(--accent-soft); color: var(--accent); border: none; border-radius: 8px; padding: .4rem .9rem; cursor: pointer; font: inherit; }
+    select { background: var(--card); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: .45rem .8rem; font: inherit; }
   </style>
 </head>
 <body>
@@ -50,12 +56,37 @@
     <button data-tone="decontracte">Décontracté</button>
   </div>
 
+  <p>
+    <label for="lang">Traduire aussi en :</label>
+    <select id="lang">
+      <option value="auto">Pas de traduction</option>
+      <option value="fr">Français</option>
+      <option value="en">Anglais</option>
+      <option value="es">Espagnol</option>
+      <option value="de">Allemand</option>
+      <option value="it">Italien</option>
+      <option value="pt">Portugais</option>
+      <option value="nl">Néerlandais</option>
+      <option value="ar">Arabe</option>
+      <option value="zh">Chinois</option>
+      <option value="ja">Japonais</option>
+    </select>
+  </p>
+
   <p><button id="go">Réécrire</button> <span id="status"></span></p>
   <p id="error"></p>
 
   <h3>Résultat</h3>
-  <div id="result"></div>
+  <div class="results">
+    <div class="col">
+      <div id="result"></div>
     <button id="copy">Copier</button>
+    </div>
+    <div class="col" id="transCol" hidden>
+      <div id="translation"></div>
+      <button id="copyTrans">Copier la traduction</button>
+    </div>
+  </div>
 
   <h3>Historique</h3>
   <div id="history"></div>
@@ -78,17 +109,23 @@
 
       error.textContent = "";
       result.textContent = "";
+      document.getElementById("transCol").hidden = true;
       status.textContent = "Réécriture en cours...";
 
       try {
         const res = await fetch("/api/rewrite", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text, tone }),
+          body: JSON.stringify({ text, tone, lang: document.getElementById("lang").value }),
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error);
                 result.textContent = data.result;
+        document.getElementById("translation").textContent = data.translation || "";
+        document.getElementById("transCol").hidden = !data.translation;
+        if (!data.translation && document.getElementById("lang").value !== "auto") {
+          error.textContent = "La traduction n'a pas pu être générée.";
+        }
         addToHistory(text, tone, data.result);
       } catch (e) {
         error.textContent = e.message || "Une erreur est survenue";
@@ -99,6 +136,10 @@
 
     document.getElementById("copy").addEventListener("click", () => {
             navigator.clipboard.writeText(document.getElementById("result").textContent);
+    });
+
+    document.getElementById("copyTrans").addEventListener("click", () => {
+      navigator.clipboard.writeText(document.getElementById("translation").textContent);
     });
 
     const KEY = "reecrivain_history";
@@ -144,6 +185,7 @@
         btn.addEventListener("click", () => {
           document.getElementById("input").value = item.original;
           document.getElementById("result").textContent = item.result;
+          document.getElementById("transCol").hidden = true;
         });
         div.append(meta, txt, btn);
         box.appendChild(div);
