@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Réécrivain</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 720px; margin: 2rem auto; padding: 0 1rem; }
+    textarea { width: 100%; min-height: 160px; padding: .75rem; font: inherit; box-sizing: border-box; }
+    .tones button { margin: .2rem; padding: .5rem .9rem; cursor: pointer; border: 1px solid #999; border-radius: 6px; background: #fff; }
+    .tones button.active { background: #333; color: #fff; }
+    #go { padding: .6rem 1.4rem; font-size: 1rem; cursor: pointer; }
+    #result { white-space: pre-wrap; background: #f5f5f5; padding: 1rem; border-radius: 8px; min-height: 80px; margin-top: .5rem; }
+    #error { color: #c00; }
+  </style>
+</head>
+<body>
+  <h1>Réécrivain</h1>
+
+  <textarea id="input" placeholder="Colle ton texte ici..."></textarea>
+
+  <div class="tones">
+    <button data-tone="professionnel" class="active">Professionnel</button>
+    <button data-tone="courtois">Courtois</button>
+    <button data-tone="joyeux">Joyeux</button>
+    <button data-tone="concis">Concis</button>
+    <button data-tone="decontracte">Décontracté</button>
+  </div>
+
+  <p><button id="go">Réécrire</button> <span id="status"></span></p>
+  <p id="error"></p>
+
+  <h3>Résultat</h3>
+  <div id="result"></div>
+  <button id="copy">Copier</button>
+
+  <script>
+    let tone = "professionnel";
+    const buttons = document.querySelectorAll("[data-tone]");
+
+    buttons.forEach(b => b.addEventListener("click", () => {
+      tone = b.dataset.tone;
+      buttons.forEach(x => x.classList.toggle("active", x === b));
+    }));
+
+    document.getElementById("go").addEventListener("click", async () => {
+      const text = document.getElementById("input").value;
+      const status = document.getElementById("status");
+      const error = document.getElementById("error");
+      const result = document.getElementById("result");
+
+      error.textContent = "";
+      result.textContent = "";
+      status.textContent = "Réécriture en cours...";
+
+      try {
+        const res = await fetch("/api/rewrite", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text, tone }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        result.textContent = data.result;
+      } catch (e) {
+        error.textContent = e.message || "Une erreur est survenue";
+      } finally {
+        status.textContent = "";
+      }
+    });
+
+    document.getElementById("copy").addEventListener("click", () => {
+      navigator.clipboard.writeText(document.getElementById("result").textContent);
+    });
+  </script>
+</body>
+</html>
