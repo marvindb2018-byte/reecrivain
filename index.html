@@ -41,6 +41,9 @@
     #translation:empty { min-height: 80px; }
     #copyTrans { background: var(--accent-soft); color: var(--accent); border: none; border-radius: 8px; padding: .4rem .9rem; cursor: pointer; font: inherit; }
     select { background: var(--card); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: .45rem .8rem; font: inherit; }
+  .slider { margin: .8rem 0; }
+    .slider input[type=range] { width: 100%; accent-color: var(--accent); }
+    .slider-labels { display: flex; justify-content: space-between; color: var(--muted); font-size: .85rem; }
   </style>
 </head>
 <body>
@@ -54,6 +57,11 @@
     <button data-tone="joyeux">Joyeux</button>
     <button data-tone="concis">Concis</button>
     <button data-tone="decontracte">Décontracté</button>
+    <div class="slider">
+      <label for="intensity">Intensité : <strong id="intensityLabel">Modéré</strong></label>
+      <input type="range" id="intensity" min="1" max="5" step="1" value="3">
+      <div class="slider-labels"><span>Léger</span><span>Marqué</span></div>
+    </div>
   </div>
 
   <p>
@@ -116,7 +124,7 @@
         const res = await fetch("/api/rewrite", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text, tone, lang: document.getElementById("lang").value }),
+          body: JSON.stringify({ text, tone, lang: document.getElementById("lang").value, intensity: Number(document.getElementById("intensity").value) }),
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error);
@@ -140,6 +148,12 @@
 
     document.getElementById("copyTrans").addEventListener("click", () => {
       navigator.clipboard.writeText(document.getElementById("translation").textContent);
+    });
+
+    const NAMES = ["Très léger", "Léger", "Modéré", "Marqué", "Très marqué"];
+    const slider = document.getElementById("intensity");
+    slider.addEventListener("input", () => {
+      document.getElementById("intensityLabel").textContent = NAMES[slider.value - 1];
     });
 
     const KEY = "reecrivain_history";
