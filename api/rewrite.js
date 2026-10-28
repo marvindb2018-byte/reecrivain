@@ -46,7 +46,9 @@ export default async function handler(req, res) {
       }),
     });
 
-    if (!response.ok) {
+        if (!response.ok) {
+      const detail = await response.text();
+      console.error("Fournisseur IA:", response.status, detail);
       return res.status(502).json({ error: "Le fournisseur IA a renvoyé une erreur" });
     }
 
