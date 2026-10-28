@@ -24,7 +24,8 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Méthode non autorisée" });
   }
 
-  const { text, tone, lang } = req.body || {};
+  const { text, tone, lang, intensity } = req.body || {};
+  const level = Number.isInteger(intensity) && intensity >= 1 && intensity <= 5 ? intensity : 3;
   const langName = typeof lang === "string" && Object.hasOwn(LANGS, lang) ? LANGS[lang] : null;
 
   if (typeof text !== "string" || !text.trim()) {
@@ -50,7 +51,7 @@ export default async function handler(req, res) {
           {
             role: "system",
             content:
-              `Tu es un rédacteur expert en français. Réécris le texte fourni avec ${TONES[tone]}. ` +
+              `Tu es un rédacteur expert en français. Réécris le texte fourni avec ${TONES[tone]}. Intensité du ton : ${level} sur 5 (1 = à peine perceptible, 5 = très prononcé). ` +
               "Conserve le sens et toutes les informations. " +
               "Écris dans la même langue que le texte d'origine. " +
               "Réponds uniquement avec le texte réécrit, sans introduction ni commentaire.",
