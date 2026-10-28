@@ -81,6 +81,8 @@
     </select>
   </p>
 
+  <p><label><input type="checkbox" id="clean" checked> Retirer les incivilités (insultes, vulgarité, agressivité)</label></p>
+
   <p><button id="go">Réécrire</button> <span id="status"></span></p>
   <p id="error"></p>
 
@@ -124,7 +126,7 @@
         const res = await fetch("/api/rewrite", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text, tone, lang: document.getElementById("lang").value, intensity: Number(document.getElementById("intensity").value) }),
+          body: JSON.stringify({ clean: document.getElementById("clean").checked, text, tone, lang: document.getElementById("lang").value, intensity: Number(document.getElementById("intensity").value) }),
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error);
