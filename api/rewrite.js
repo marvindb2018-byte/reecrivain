@@ -54,13 +54,14 @@ export default async function handler(req, res) {
             content:
               `Tu es un rédacteur expert en français. Réécris le texte fourni avec ${TONES[tone]}. Intensité du ton : ${level} sur 5 (1 = à peine perceptible, 5 = très prononcé). ` +
               "Conserve le sens et toutes les informations. " +
+              "Reformule en profondeur : change la structure des phrases et utilise des synonymes et des tournures différentes, sans recopier les mots et expressions du texte d'origine. Ne garde tels quels que les noms propres, chiffres, dates et termes techniques. " +
               (clean ? "Supprime ou remplace toute insulte, grossièreté, vulgarité et formulation agressive ou irrespectueuse, en gardant les faits et les demandes de l'auteur. " : "") +
               "Écris dans la même langue que le texte d'origine. " +
               "Réponds uniquement avec le texte réécrit, sans introduction ni commentaire.",
           },
           { role: "user", content: text },
         ],
-        temperature: 0.7,
+        temperature: 0.9,
       }),
     });
 
