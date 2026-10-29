@@ -44,6 +44,7 @@
   .slider { margin: .8rem 0; }
     .slider input[type=range] { width: 100%; accent-color: var(--accent); }
     .slider-labels { display: flex; justify-content: space-between; color: var(--muted); font-size: .85rem; }
+  .boom { position: fixed; pointer-events: none; font-size: 1.6rem; z-index: 9999; }
   </style>
 </head>
 <body>
@@ -157,6 +158,37 @@
     slider.addEventListener("input", () => {
       document.getElementById("intensityLabel").textContent = NAMES[slider.value - 1];
     });
+
+    function boom(btn) {
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      const r = btn.getBoundingClientRect();
+      const cx = r.left + r.width / 2;
+      const cy = r.top + r.height / 2;
+      for (let i = 0; i < 24; i++) {
+        const el = document.createElement("span");
+        el.className = "boom";
+        el.textContent = "🖕";
+        el.style.left = cx + "px";
+        el.style.top = cy + "px";
+        document.body.appendChild(el);
+        const angle = Math.random() * Math.PI * 2;
+        const dist = 80 + Math.random() * 160;
+        const dx = Math.cos(angle) * dist;
+        const dy = Math.sin(angle) * dist;
+        const rot = (Math.random() - 0.5) * 720;
+        const size = 1 + Math.random();
+        const anim = el.animate(
+          [
+            { transform: "translate(-50%, -50%) scale(.3)", opacity: 1 },
+            { transform: `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) rotate(${rot}deg) scale(${size})`, opacity: 0 },
+          ],
+          { duration: 700 + Math.random() * 500, easing: "cubic-bezier(.2,.8,.3,1)" }
+        );
+        anim.onfinish = () => el.remove();
+      }
+    }
+
+    document.getElementById("go").addEventListener("click", e => boom(e.currentTarget));
 
     const KEY = "reecrivain_history";
 
