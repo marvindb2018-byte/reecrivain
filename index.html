@@ -172,7 +172,7 @@
         el.style.top = cy + "px";
         document.body.appendChild(el);
         const angle = Math.random() * Math.PI * 2;
-        const dist = 80 + Math.random() * 160;
+        const dist = 150 + Math.random() * Math.max(window.innerWidth, window.innerHeight) * 0.6;
         const dx = Math.cos(angle) * dist;
         const dy = Math.sin(angle) * dist;
         const rot = (Math.random() - 0.5) * 720;
@@ -182,7 +182,7 @@
             { transform: "translate(-50%, -50%) scale(.3)", opacity: 1 },
             { transform: `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) rotate(${rot}deg) scale(${size})`, opacity: 0 },
           ],
-          { duration: 700 + Math.random() * 500, easing: "cubic-bezier(.2,.8,.3,1)" }
+          { duration: 1400 + Math.random() * 1000, easing: "cubic-bezier(.2,.8,.3,1)" }
         );
         anim.onfinish = () => el.remove();
       }
