@@ -164,7 +164,7 @@
       const r = btn.getBoundingClientRect();
       const cx = r.left + r.width / 2;
       const cy = r.top + r.height / 2;
-      for (let i = 0; i < 24; i++) {
+      for (let i = 0; i < 48; i++) {
         const el = document.createElement("span");
         el.className = "boom";
         el.textContent = "🖕";
@@ -180,6 +180,7 @@
         const anim = el.animate(
           [
             { transform: "translate(-50%, -50%) scale(.3)", opacity: 1 },
+            { opacity: 1, offset: 0.95 },
             { transform: `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) rotate(${rot}deg) scale(${size})`, opacity: 0 },
           ],
           { duration: 1400 + Math.random() * 1000, easing: "cubic-bezier(.2,.8,.3,1)" }
