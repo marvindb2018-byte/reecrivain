@@ -28,8 +28,7 @@ export default async function handler(req, res) {
   const level = Number.isInteger(intensity) && intensity >= 1 && intensity <= 5 ? intensity : 3;
   const langName = typeof lang === "string" && Object.hasOwn(LANGS, lang) ? LANGS[lang] : null;
 
-  const clean = req.body?.clean === true;
-  const clean = req.body?.clean === true;
+   const clean = req.body?.clean === true;
   if (typeof text !== "string" || !text.trim()) {
     return res.status(400).json({ error: "Texte manquant" });
   }
