@@ -45,6 +45,11 @@
     .slider input[type=range] { width: 100%; accent-color: var(--accent); }
     .slider-labels { display: flex; justify-content: space-between; color: var(--muted); font-size: .85rem; }
   .boom { position: fixed; pointer-events: none; font-size: 1.6rem; z-index: 9999; }
+  .tones button { position: relative; }
+    .tones button::after { content: attr(data-tip); position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%); background: #1f2430; color: #fff; border: 1px solid var(--border); padding: .45rem .7rem; border-radius: 8px; font-size: .85rem; font-weight: 400; width: max-content; max-width: 240px; white-space: normal; text-align: center; opacity: 0; pointer-events: none; transition: opacity .15s; z-index: 10; }
+    .tones button:first-of-type::after { left: 0; transform: none; }
+    .tones button:last-of-type::after { left: auto; right: 0; transform: none; }
+    .tones button:hover::after { opacity: 1; }
   </style>
 </head>
 <body>
@@ -190,6 +195,15 @@
     }
 
     document.getElementById("go").addEventListener("click", e => boom(e.currentTarget));
+
+    const TIPS = {
+      professionnel: "Un ton professionnel et soigné, adapté au monde du travail",
+      courtois: "Un ton courtois, poli et bienveillant",
+      joyeux: "Un ton joyeux, enthousiaste et chaleureux",
+      concis: "Un style concis et direct, en supprimant le superflu",
+      decontracte: "Un ton décontracté et naturel",
+    };
+    buttons.forEach(b => { b.dataset.tip = TIPS[b.dataset.tone] || ""; });
 
     const KEY = "reecrivain_history";
 
