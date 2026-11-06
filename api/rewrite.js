@@ -1,4 +1,12 @@
 const TONES = {
+  professionnel: "un ton professionnel : vocabulaire soutenu et précis, phrases bien structurées, formules adaptées au monde du travail, aucune familiarité",
+  courtois: "un ton courtois : formules de politesse, tournures atténuées et conditionnelles (« pourriez-vous », « je vous serais reconnaissant »), attitude respectueuse et bienveillante",
+  joyeux: "un ton joyeux : vocabulaire positif et énergique, phrases dynamiques, enthousiasme chaleureux, quelques exclamations",
+  concis: "un style concis : phrases courtes, aucun mot superflu, va droit à l'essentiel",
+  decontracte: "un ton décontracté : langage courant et naturel, phrases simples comme à l'oral, sans vulgarité",
+};
+
+const TONES_OLD = {
   professionnel: "un ton professionnel et soigné, adapté au monde du travail",
   courtois: "un ton courtois, poli et bienveillant",
   joyeux: "un ton joyeux, enthousiaste et chaleureux",
@@ -59,7 +67,7 @@ export default async function handler(req, res) {
               "Écris dans la même langue que le texte d'origine. " +
               "Réponds uniquement avec le texte réécrit, sans introduction ni commentaire.",
           },
-          { role: "user", content: text },
+          { role: "user", content: `Réécris ce texte avec tes propres mots : change le vocabulaire et la construction des phrases, sans recopier ses formulations.\n\nTexte :\n${text}` },
         ],
         temperature: 0.9,
       }),
